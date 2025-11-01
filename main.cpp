@@ -15,9 +15,10 @@ int main() {
 
   sf::CircleShape person(10.f);
   person.setFillColor(sf::Color::Green);
+  person.setPosition(window.getSize().x / 2, window.getSize().y / 2);
 
   // float speed = 0.05f;
-  float speed = 0.5f;
+  float speed = 0.2f;
   sf::Clock clock;
   sf::Text exibFPS;
   sf::Text exibOrient;
