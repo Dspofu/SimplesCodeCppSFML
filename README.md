@@ -14,9 +14,10 @@ Download the [SFML 2.6.2](https://www.sfml-dev.org/download/sfml/2.6.2) library
 
 <br>
 
-\- [**Download release for demo**](https://github.com/dspofu/SimplesCodeCppSFML/releases/tag/v0.1.0%40demo)
+\- [**Download release for demo**](https://github.com/dspofu/SimplesCodeCppSFML/releases/tag/v0.2.0%40demo)
 ## Result 🕹️
 
 
 **In this example I leave a** `WASD` `shift` **and** `crtl` **control. Movement and speed controls.**
-<video src="https://github.com/dspofu/SimplesCodeCppSFML/blob/main/demo.mp4" alt="Error ao carregar">
+
+![Video](demo.mp4)
