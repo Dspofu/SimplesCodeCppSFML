@@ -1,91 +1,94 @@
+#include <windows.h>
 #include <iostream>
+#include <d3d9.h>
+#include <conio.h>
 #include <string>
 #include <SFML/Graphics.hpp>
-#include "modules/controller.h"
+#include <SFML/Audio.hpp>
+#include "src/screens/menu.h"
+
+#pragma comment(lib, "d3d9.lib")
 
 int main() {
-  int width = 800;
-  int height = 600;
-  int impact = 20;
-  bool XboolL = false;
-  bool XboolR = false;
-  bool YboolU = false;
-  bool YboolD = false;
-  sf::RenderWindow window(sf::VideoMode(width, height), "Circle that moves");
+  // char buffer[MAX_PATH];
+  // GetCurrentDirectoryA(MAX_PATH, buffer);
+  // std::cout << buffer << std::endl;
+  // SetConsoleOutputCP(CP_UTF8);
+  // SetConsoleCP(CP_UTF8);
 
-  sf::CircleShape person(10.f);
-  person.setFillColor(sf::Color::Green);
-  person.setPosition(window.getSize().x / 2, window.getSize().y / 2);
+  IDirect3D9 *d3d = Direct3DCreate9(D3D_SDK_VERSION);
+  if (d3d) {
+    D3DADAPTER_IDENTIFIER9 adapterIdentifier;
+    if (SUCCEEDED(d3d->GetAdapterIdentifier(D3DADAPTER_DEFAULT, 0, &adapterIdentifier))) {
+      // std::wcout << L"GPU: " << adapterIdentifier.Description << L"\nDriver: " << adapterIdentifier.Driver << L"\nDevice Name: " << adapterIdentifier.DeviceName << L"\nVendor ID: " << std::hex << adapterIdentifier.VendorId << L"\nDevice ID: " << std::hex << adapterIdentifier.DeviceId << L"\nSubSystem ID: " << std::hex << adapterIdentifier.SubSysId << std::endl;
 
-  // float speed = 0.05f;
-  float speed = 0.2f;
-  sf::Clock clock;
-  sf::Text exibFPS;
-  sf::Text exibOrient;
-  sf::Font font;
-  Controller moveAll = Controller(width, height);
-  if (font.loadFromFile("fonts/retro_gaming.ttf")) {
-    exibFPS.setFont(font);
-    exibFPS.setCharacterSize(18);
-    exibFPS.setFillColor(sf::Color::Yellow);
-    exibOrient.setFont(font);
-    exibOrient.setCharacterSize(10);
-    exibOrient.setFillColor(sf::Color::Yellow);
-    exibOrient.setPosition(260, 570);
-  }
+      // getch();
+      int width = 800;
+      int height = 600;
+      int impact = 20;
+      bool XboolL = false;
+      bool XboolR = false;
+      bool YboolU = false;
+      bool YboolD = false;
+      bool isFPS = true;
+      bool isGPU = true;
+      bool isPlay = false;
 
-  while (window.isOpen()) {
-    sf::Event event;
-    sf::Time elapsed = clock.restart();
-    float fps = 1.0f / elapsed.asSeconds();
+      sf::RenderWindow window(sf::VideoMode(width, height), "DemoGame");
+      window.setFramerateLimit(120);
 
-    exibFPS.setString("FPS: " + std::to_string((int)fps));
-    exibOrient.setString("Keys from Movimented: W = Up, S = Down, D = Right, A = Left;\nFrom Speed: Shift = Fast, Ctrol = Slow");
-    while (window.pollEvent(event)) {
-      if (event.type == sf::Event::Closed) window.close();
-      if (sf::Keyboard::isKeyPressed(sf::Keyboard::LShift)) { speed = speed+0.05f; }
-      if (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl)) { if(speed >= 0) speed = speed-0.05f; }
+      float speed = 4;
+      sf::Event event;
+      sf::Clock clock;
+      sf::Text exibFPS;
+      sf::Text deviceGPU;
+      sf::Font font;
+      sf::SoundBuffer bufferEntry;
+      sf::Sound sound;
+      sound.setBuffer(bufferEntry);
+      if (!bufferEntry.loadFromFile("src/assets/sounds/entry.mp3")) return MessageBoxW(NULL, L"Audio is not found.", L"Error loading audio", MB_OK | MB_ICONERROR);
+      if (!font.loadFromFile("src/assets/fonts/retro_gaming.ttf")) return MessageBoxW(NULL, L"Text font is not found.", L"Error loading text font", MB_OK | MB_ICONERROR);
+      Controller moveAll = Controller(width, height);
+
+      // FPS
+      exibFPS.setFont(font);
+      exibFPS.setCharacterSize(18);
+      exibFPS.setFillColor(sf::Color::Yellow);
+
+      // GPU
+      deviceGPU.setFont(font);
+      deviceGPU.setCharacterSize(10);
+      deviceGPU.setFillColor(sf::Color::Yellow);
+      deviceGPU.setPosition(0, 20);
+
+      Menu startScreen = Menu(window, font);
+      while (window.isOpen()) {
+        while (window.pollEvent(event)) {
+          if (event.type == sf::Event::Closed) window.close();
+        }
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::LShift)) isFPS = !isFPS;
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::LControl)) isGPU = !isGPU;
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::T)) isPlay = !isPlay;
+
+        sf::Time elapsed = clock.restart();
+        float fps = 1.0f / elapsed.asSeconds();
+        
+        if (isGPU) deviceGPU.setString("GPU: " + std::string(adapterIdentifier.Description));
+        else deviceGPU.setString("");
+        if (isFPS) exibFPS.setString("FPS: " + std::to_string((int)fps));
+        else exibFPS.setString("");
+        if (isPlay) sound.play();
+
+        window.clear();
+        startScreen.load();
+        window.draw(exibFPS);
+        window.draw(deviceGPU);
+        window.display();
+      }
     }
-    sf::Vector2f position = person.getPosition();
-
-    if (speed < 0) { speed = 0.05f; }
-
-    moveAll.moveUp(person, speed, position.y);
-    moveAll.moveDown(person, speed, position.y);
-    moveAll.moveLeft(person, speed, position.x);
-    moveAll.moveRight(person, speed, position.x);
-
-
-    window.clear();
-    window.draw(exibFPS);
-    window.draw(exibOrient);
-    window.draw(person);
-    window.display();
+    d3d->Release();
   }
+  else MessageBoxW(NULL, L"Support for \"DirectX\" was not identified.", L"Error GPU detect", MB_OK | MB_ICONERROR);
+
   return 0;
 }
-
-// void controller(std::string key, sf::CircleShape &personagem) {
-//   sf::Keyboard::isKeyPressed(key);
-// }
-// std::string what = "\033[32mTecla pressionada: \033[34m";
-
-
-// void setTimeout(std::string text = "Your text.", int time = 1000) {
-//   auto start = std::chrono::high_resolution_clock::now();
-
-//   for (char write: text) {
-//     while (true) {
-//       auto end = std::chrono::high_resolution_clock::now();
-//       std::chrono::duration<double, std::milli> elapsed = end - start;
-
-//       if (elapsed.count() >= time) {
-//         std::cout << write;
-//         start = std::chrono::high_resolution_clock::now();
-//         break;
-//       }
-//       std::this_thread::sleep_for(std::chrono::milliseconds(100));
-//     }
-//   }
-//   std::cout << "\n";
-// }
