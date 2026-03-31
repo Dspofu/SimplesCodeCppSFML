@@ -18,6 +18,6 @@ Download the [SFML 2.6.2](https://www.sfml-dev.org/download/sfml/2.6.2) library
 ## Result 🕹️
 
 
-**In this example I leave a** `WASD` `shift` **and** `crtl` **control. Movement and speed controls.**
+**In this example I leave a** `WASD` **control. Movement and speed controls.**
 
-![Video](demo.mp4)
+![DemoGame](image.png)
